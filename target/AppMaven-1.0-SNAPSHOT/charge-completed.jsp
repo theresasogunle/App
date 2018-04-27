@@ -9,12 +9,16 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
         <title>Card Charge</title>
     </head>
     <body>
         <form action="Index">
-        <h1>Transaction Completed!</h1>
-       <input type="submit" value="OK" name="conf"/>
+        <h1 class="control-label">Transaction Completed!</h1>
+       <input type="submit" value="OK" />
         </form>
        
         

@@ -54,18 +54,15 @@ public class ValidateAccount extends HttpServlet {
          
             String otp = request.getParameter("otp");
          
-            AccountCharge ch= new AccountCharge();
-         
-            RaveConstant.ENVIRONMENT= Environment.STAGING;
-            RaveConstant.PUBLIC_KEY="FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
-            RaveConstant.SECRET_KEY="FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
+            
                 try{
             String flwRef =(String)request.getSession().getAttribute("flwRef");
+            AccountCharge payload =(AccountCharge)request.getSession().getAttribute("payload");
 
-            ch.setTransaction_reference(flwRef);
-            ch.setOtp(otp);
+            payload.setTransaction_reference(flwRef);
+            payload.setOtp(otp);
 
-            JSONObject val=  ch.validateAccountCharge();
+            JSONObject val=  payload.validateAccountCharge();
             System.out.println(val);
        
          
@@ -75,7 +72,7 @@ public class ValidateAccount extends HttpServlet {
             return;
         }else
         {
-               response.sendRedirect("Error");
+               response.sendRedirect("AccountError");
                return;
         }
         }catch(Exception ex){}

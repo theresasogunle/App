@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -55,9 +56,6 @@ public class ChargeAccount extends HttpServlet {
             String acc=request.getParameter("acc");
             String bank=request.getParameter("bank");
             String email=request.getParameter("email");
-             InetAddress inetAddress = InetAddress.getLocalHost();
-            String IP= inetAddress.getHostAddress();
-            
             Double txR= Math.random();
             
             String txRef= txR.toString();
@@ -71,7 +69,6 @@ public class ChargeAccount extends HttpServlet {
               .setAccountnumber(acc)
               .setEmail(email)
               .setTxRef(txRef)
-              .setIP(IP)
               .setAmount("1000")
               .setCountry("NG")
               .setCurrency("NGN");
@@ -79,25 +76,27 @@ public class ChargeAccount extends HttpServlet {
             JSONObject charge= ch.chargeAccount();
             
             System.out.println(charge);
-            JSONObject data =(JSONObject) charge.get("data");
-            String flw= (String)data.get("flwRef");
-            System.out.println(flw);
+       
              if(charge.get("status").equals("success")){
-                 
-                 HttpSession session = request.getSession(true); 
-                 session.setAttribute("flwRef",flw); 
-                 
-                   response.sendRedirect("ValidateAccount");
+                     JSONObject data =(JSONObject) charge.get("data");
+                    String flw= (String)data.get("flwRef");
+                    HttpSession session = request.getSession(true); 
+                    session.setAttribute("flwRef",flw); 
+                    session.setAttribute("payload", ch);
+                    response.sendRedirect("ValidateAccount");
                         return;
          
           }else{
-                  
-                  response.sendRedirect("Error");
-              return;
+                    String message =(String) charge.get("message");
+                    System.out.println(message);
+                   HttpSession session = request.getSession(true); 
+                    session.setAttribute("message",message);
+                response.sendRedirect("AccountError");
+                return;
          
               }
          
-            }catch(Exception ex){}
+            }catch(JSONException ex){}
         doGet(request, response);
     }
 

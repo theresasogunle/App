@@ -5,6 +5,8 @@
  */
 package com.rave.appmaven;
 
+import com.github.theresasogunle.Environment;
+import com.github.theresasogunle.RaveConstant;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.RequestDispatcher;
@@ -48,9 +50,9 @@ public class Error extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+          doGet(request, response);
+         
       
-        
-        doGet(request, response);
     }
 
     /**

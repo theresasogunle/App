@@ -64,8 +64,7 @@ public class ChargeCard extends HttpServlet {
             String pin=request.getParameter("pin");
             String expiry_month=request.getParameter("month");
             String expiry_year=request.getParameter("year");
-             InetAddress inetAddress = InetAddress.getLocalHost();
-            String IP= inetAddress.getHostAddress();
+           
             
             Double txR= Math.random();
             
@@ -85,7 +84,6 @@ public class ChargeCard extends HttpServlet {
             payload.setEmail(email);
             payload.setExpiryyear(expiry_year);
             payload.setExpirymonth(expiry_month);
-            payload.setIP(IP);
             payload.setPin(pin);
             payload.setSuggested_auth("PIN");
             payload.setTxRef(txRef);
@@ -94,21 +92,27 @@ public class ChargeCard extends HttpServlet {
             JSONObject charge= payload.chargeMasterAndVerveCard();
             
             System.out.println(charge);
-            JSONObject data =(JSONObject) charge.get("data");
-            String flw= (String)data.get("flwRef");
-            System.out.println(flw);
-               
+          
               if(charge.get("status").equals("success")){
-                 
-                 HttpSession session = request.getSession(true); 
-                 session.setAttribute("flwRef",flw); 
+                JSONObject data =(JSONObject) charge.get("data");
+                 String flw= (String)data.get("flwRef");
+                 String message =(String)data.get("chargeResponseMessage");
+               
+                  System.out.println(message);
+
+                HttpSession session = request.getSession(true); 
+                session.setAttribute("flwRef",flw); 
                  
                    response.sendRedirect("ValidateCard");
                         return;
          
           }else{
-                  
-                  response.sendRedirect("Error");
+                    String message =(String) charge.get("message");
+                    System.out.println(message);
+                    
+                HttpSession session = request.getSession(true); 
+                session.setAttribute("message",message); 
+                    response.sendRedirect("Error");
               return;
          
               }

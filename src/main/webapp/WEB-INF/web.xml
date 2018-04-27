@@ -31,6 +31,10 @@
         <servlet-name>Error</servlet-name>
         <servlet-class>com.rave.appmaven.Error</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AccountError</servlet-name>
+        <servlet-class>com.rave.appmaven.AccountError</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>Index</servlet-name>
         <url-pattern>/Index</url-pattern>
@@ -58,6 +62,10 @@
     <servlet-mapping>
         <servlet-name>Error</servlet-name>
         <url-pattern>/Error</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AccountError</servlet-name>
+        <url-pattern>/AccountError</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
