@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONObject;
 
 /**
@@ -22,8 +23,7 @@ import org.json.JSONObject;
  */
 public class ValidateCard extends HttpServlet {
 
-   
-   // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -35,8 +35,8 @@ public class ValidateCard extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-          RequestDispatcher view=request.getRequestDispatcher("validate-card.jsp");
-		view.forward(request, response);
+        RequestDispatcher view = request.getRequestDispatcher("validate-card.jsp");
+        view.forward(request, response);
     }
 
     /**
@@ -50,37 +50,40 @@ public class ValidateCard extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String otp = request.getParameter("otp");
-        CardCharge ch= new CardCharge();
-     
-            RaveConstant.ENVIRONMENT= Environment.STAGING;
-            RaveConstant.PUBLIC_KEY="FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
-            RaveConstant.SECRET_KEY="FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
-     
-          try{
-       
-            String flwRef =(String)request.getSession().getAttribute("flwRef");
+        CardCharge ch = new CardCharge();
+
+        RaveConstant.ENVIRONMENT = Environment.STAGING;
+        RaveConstant.PUBLIC_KEY = "FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
+        RaveConstant.SECRET_KEY = "FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
+
+        try {
+
+            String flwRef = (String) request.getSession().getAttribute("flwRef");
             System.out.println(flwRef);
             ch.setTransactionreference(flwRef);
             ch.setOtp(otp);
-        
-           JSONObject val=  ch.validateCardCharge();
-              System.out.println(val);
-       
-         
-        if(val.get("status").equals("success")){
 
-            response.sendRedirect("ChargeCompleted");
-            return;
-        }else
-        {
-            response.sendRedirect("Error");
-            return;
+            JSONObject val = ch.validateCardCharge();
+            System.out.println(val);
+
+            if (val.get("status").equals("success")) {
+
+                response.sendRedirect("ChargeCompleted");
+                return;
+            } else {
+                String message = (String) val.get("message");
+                System.out.println(message);
+                HttpSession session = request.getSession(true);
+                session.setAttribute("message", message);
+                response.sendRedirect("Error");
+                return;
+            }
+        } catch (Exception ex) {
         }
-        }catch(Exception ex){}
-          
-       doGet(request,response);
+
+        doGet(request, response);
     }
 
     /**

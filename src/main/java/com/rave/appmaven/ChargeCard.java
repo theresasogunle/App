@@ -9,17 +9,14 @@ import com.github.theresasogunle.CardCharge;
 import com.github.theresasogunle.Environment;
 import com.github.theresasogunle.RaveConstant;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.smartcardio.Card;
-import org.json.JSONException;
+
 import org.json.JSONObject;
 
 /**
@@ -28,7 +25,6 @@ import org.json.JSONObject;
  */
 public class ChargeCard extends HttpServlet {
 
-  
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -41,9 +37,9 @@ public class ChargeCard extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         RequestDispatcher view=request.getRequestDispatcher("charge-card.jsp");
-		view.forward(request, response);
-      
+        RequestDispatcher view = request.getRequestDispatcher("charge-card.jsp");
+        view.forward(request, response);
+
     }
 
     /**
@@ -57,72 +53,73 @@ public class ChargeCard extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-         String cardnumber=request.getParameter("cardnumber");
-            String cvv=request.getParameter("cvv");
-            String email=request.getParameter("email");
-            String pin=request.getParameter("pin");
-            String expiry_month=request.getParameter("month");
-            String expiry_year=request.getParameter("year");
-           
-            
-            Double txR= Math.random();
-            
-            String txRef= txR.toString();
-            
-            
-            
-            RaveConstant.ENVIRONMENT= Environment.STAGING;
-            RaveConstant.PUBLIC_KEY="FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
-            RaveConstant.SECRET_KEY="FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
-             try{
-            CardCharge payload = new CardCharge();
-            
-            payload.setCardno(cardnumber);
-            payload.setCvv(cvv);
-            payload.setAmount("1000");
-            payload.setEmail(email);
-            payload.setExpiryyear(expiry_year);
-            payload.setExpirymonth(expiry_month);
-            payload.setPin(pin);
-            payload.setSuggested_auth("PIN");
-            payload.setTxRef(txRef);
-             
-            
-            JSONObject charge= payload.chargeMasterAndVerveCard();
-            
-            System.out.println(charge);
-          
-              if(charge.get("status").equals("success")){
-                JSONObject data =(JSONObject) charge.get("data");
-                 String flw= (String)data.get("flwRef");
-                 String message =(String)data.get("chargeResponseMessage");
-               
-                  System.out.println(message);
 
-                HttpSession session = request.getSession(true); 
-                session.setAttribute("flwRef",flw); 
-                 
-                   response.sendRedirect("ValidateCard");
-                        return;
-         
-          }else{
-                    String message =(String) charge.get("message");
-                    System.out.println(message);
-                    
-                HttpSession session = request.getSession(true); 
-                session.setAttribute("message",message); 
-                    response.sendRedirect("Error");
-              return;
-         
-              }
-         
-        } catch (JSONException ex) {
-            Logger.getLogger(Card.class.getName()).log(Level.SEVERE, null, ex);
+        String cardnumber = request.getParameter("cardnumber");
+        String cvv = request.getParameter("cvv");
+        String email = request.getParameter("email");
+        String pin = request.getParameter("pin");
+        String expiry_month = request.getParameter("month");
+        String expiry_year = request.getParameter("year");
+
+        Double txR = Math.random();
+
+        String txRef = txR.toString();
+
+        RaveConstant.ENVIRONMENT = Environment.STAGING;
+        RaveConstant.PUBLIC_KEY = "FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
+        RaveConstant.SECRET_KEY = "FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
+
+        CardCharge payload = new CardCharge();
+
+        payload.setCardno(cardnumber);
+        payload.setCvv(cvv);
+        payload.setAmount("1000");
+        payload.setEmail(email);
+        payload.setExpiryyear(expiry_year);
+        payload.setExpirymonth(expiry_month);
+        payload.setTxRef(txRef);
+
+        JSONObject charge = payload.chargeCard();
+
+        System.out.println(charge);
+        if (charge.get("status").equals("error")) {
+            String message = (String) charge.get("message");
+            System.out.println(message);
+            HttpSession session = request.getSession(true);
+            session.setAttribute("message", message);
+            response.sendRedirect("Error");
+            return;
         }
-        
-          doGet(request, response);
-        
+
+        if (charge.get("status").equals("success")) {
+            JSONObject data = (JSONObject) charge.get("data");
+            if (data.has("suggested_auth")) {
+                String authmode = (String) data.get("suggested_auth");
+
+                if (authmode.equals("PIN")) {
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("pay", payload);
+                    session.setAttribute("auth", authmode);
+                    response.sendRedirect("Pin");
+                    return;
+
+                } else if (authmode.equals("NOAUTH_INTERNATIONAL") || authmode.equalsIgnoreCase("AVS_VBVSECURECODE")) {
+
+                    HttpSession session = request.getSession(true);
+
+                    session.setAttribute("pay", payload);
+                    session.setAttribute("auth", authmode);
+                    response.sendRedirect("Billing");
+                    return;
+                }
+
+            } else {
+                response.sendRedirect("ChargeCompleted");
+                return;
+            }
+        }
+        doGet(request, response);
+
     }
 
     /**

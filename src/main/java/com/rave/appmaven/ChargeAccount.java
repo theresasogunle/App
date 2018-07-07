@@ -25,7 +25,6 @@ import org.json.JSONObject;
  */
 public class ChargeAccount extends HttpServlet {
 
-  
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -38,8 +37,8 @@ public class ChargeAccount extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-      RequestDispatcher view=request.getRequestDispatcher("account-charge.jsp");
-		view.forward(request, response);
+        RequestDispatcher view = request.getRequestDispatcher("account-charge.jsp");
+        view.forward(request, response);
     }
 
     /**
@@ -53,50 +52,52 @@ public class ChargeAccount extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-            String acc=request.getParameter("acc");
-            String bank=request.getParameter("bank");
-            String email=request.getParameter("email");
-            Double txR= Math.random();
-            
-            String txRef= txR.toString();
-            RaveConstant.ENVIRONMENT= Environment.STAGING;
-            RaveConstant.PUBLIC_KEY="FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
-            RaveConstant.SECRET_KEY="FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
-            try{
+        String acc = request.getParameter("acc");
+        String bank = request.getParameter("bank");
+        String email = request.getParameter("email");
+        Double txR = Math.random();
+
+        String txRef = txR.toString();
+        RaveConstant.ENVIRONMENT = Environment.STAGING;
+        RaveConstant.PUBLIC_KEY = "FLWPUBK-d8369e6826011f8a1f9f6c7c14a09b80-X";
+        RaveConstant.SECRET_KEY = "FLWSECK-8abf446c71a58aaa858323f3a9ed156b-X";
+        try {
             AccountCharge ch = new AccountCharge();
-            
+
             ch.setAccountbank(bank)
-              .setAccountnumber(acc)
-              .setEmail(email)
-              .setTxRef(txRef)
-              .setAmount("1000")
-              .setCountry("NG")
-              .setCurrency("NGN");
-            
-            JSONObject charge= ch.chargeAccount();
-            
+                    .setAccountnumber(acc)
+                    .setEmail(email)
+                    .setTxRef(txRef)
+                    .setAmount("1000")
+                    .setCountry("NG")
+                    .setCurrency("NGN");
+
+            JSONObject charge = ch.chargeAccount();
+
             System.out.println(charge);
-       
-             if(charge.get("status").equals("success")){
-                     JSONObject data =(JSONObject) charge.get("data");
-                    String flw= (String)data.get("flwRef");
-                    HttpSession session = request.getSession(true); 
-                    session.setAttribute("flwRef",flw); 
+            JSONObject data = (JSONObject) charge.get("data");
+            if (charge.get("status").equals("success")) {
+                if (data.get("status").equals("success-pending-validation")) {
+
+                    String flw = (String) data.get("flwRef");
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("flwRef", flw);
                     session.setAttribute("payload", ch);
                     response.sendRedirect("ValidateAccount");
-                        return;
-         
-          }else{
-                    String message =(String) charge.get("message");
-                    System.out.println(message);
-                   HttpSession session = request.getSession(true); 
-                    session.setAttribute("message",message);
+                    return;
+                }
+            } else {
+                String message = (String) charge.get("message");
+                System.out.println(message);
+                HttpSession session = request.getSession(true);
+                session.setAttribute("message", message);
                 response.sendRedirect("AccountError");
                 return;
-         
-              }
-         
-            }catch(JSONException ex){}
+
+            }
+
+        } catch (JSONException ex) {
+        }
         doGet(request, response);
     }
 

@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.json.JSONObject;
 
 /**
@@ -22,9 +23,7 @@ import org.json.JSONObject;
  */
 public class ValidateAccount extends HttpServlet {
 
-  
-
-  // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -36,8 +35,8 @@ public class ValidateAccount extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        RequestDispatcher view=request.getRequestDispatcher("validate-account.jsp");
-		view.forward(request, response);
+        RequestDispatcher view = request.getRequestDispatcher("validate-account.jsp");
+        view.forward(request, response);
     }
 
     /**
@@ -51,33 +50,36 @@ public class ValidateAccount extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         
-            String otp = request.getParameter("otp");
-         
-            
-                try{
-            String flwRef =(String)request.getSession().getAttribute("flwRef");
-            AccountCharge payload =(AccountCharge)request.getSession().getAttribute("payload");
+
+        String otp = request.getParameter("otp");
+
+        try {
+            String flwRef = (String) request.getSession().getAttribute("flwRef");
+            AccountCharge payload = (AccountCharge) request.getSession().getAttribute("payload");
 
             payload.setTransaction_reference(flwRef);
             payload.setOtp(otp);
 
-            JSONObject val=  payload.validateAccountCharge();
+            JSONObject val = payload.validateAccountCharge();
             System.out.println(val);
-       
-         
-        if(val.get("status").equals("success")){
+            String message = (String) val.get("message");
 
-            response.sendRedirect("ChargeCompleted");
-            return;
-        }else
-        {
-               response.sendRedirect("AccountError");
-               return;
+            if (val.get("status").equals("success")) {
+
+                response.sendRedirect("ChargeCompleted");
+                return;
+            } else {
+                System.out.println(message);
+                HttpSession session = request.getSession(true);
+                session.setAttribute("message", message);
+                response.sendRedirect("Error");
+                response.sendRedirect("AccountError");
+                return;
+            }
+        } catch (Exception ex) {
         }
-        }catch(Exception ex){}
-          
-       doGet(request,response);
+
+        doGet(request, response);
     }
 
     /**

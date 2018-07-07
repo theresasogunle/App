@@ -81,15 +81,7 @@
               <input type="text"  required name="email">
             </div>
           </div>
-              <div class="control-group">
-            <label class="control-label">Card PIN</label>
-            <div class="controls">
-              <div class="row-fluid">
-                <div class="span3">
-                  <input type="text" class="input-block-level" autocomplete="off" maxlength="4" pattern="\d{4}" title="Card pin" required name="pin">
-                </div>
-              </div>
-            </div>
+           
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Submit</button>
             <button type="button" class="btn">Cancel</button>

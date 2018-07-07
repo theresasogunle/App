@@ -21,7 +21,7 @@
                  <div class="span12">
         <form action="Index">
                <legend>Card Charge</legend>
-                        <h1 class="control-label">Error in card details!</h1>
+                        <h1 class="control-label">Error occurred while trying to process transaction!</h1>
                           <%
                               String messages= (String) request.getSession().getAttribute("message");
                          %>
